@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "framework.h"
+#include "load_gdi_bitmap.h"
 #include "task1.h"
 
 #include <gdiplus.h> 
@@ -147,9 +148,12 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
             g_solidBrushBkgnd = CreateSolidBrush( RGB( rand() % 256, rand() % 256, rand() % 256 ) );
 
+            Gdiplus::Bitmap* bitmap1 = LoadGdiBitmap( hInst, MAKEINTRESOURCE( ID_BKGND_IMAGE ), _T( "JPEG" ) );
+            bitmap1->GetLastStatus();
+
             Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromFile( L"space.jpeg" );
             HBITMAP hBitmap;
-            bitmap->GetHBITMAP( {}, &hBitmap );
+            bitmap1->GetHBITMAP( {}, &hBitmap );
             g_patternBrushBkgnd = CreatePatternBrush( hBitmap );
             DeleteObject( hBitmap );
 
@@ -243,7 +247,6 @@ void SwitchWndProc( HWND hWnd, WNDPROC newWndProc ) noexcept
                                                              reinterpret_cast<LONG_PTR>( newWndProc ) ) );
 }
 
-// Обработчик сообщений для окна "О программе".
 INT_PTR CALLBACK About( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
     UNREFERENCED_PARAMETER( lParam );

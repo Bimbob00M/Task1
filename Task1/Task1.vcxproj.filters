@@ -27,6 +27,9 @@
     <ClInclude Include="task1.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="load_gdi_bitmap.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Task1.rc">
@@ -48,10 +51,8 @@
     <ClCompile Include="task1.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="jpeg2.bin">
-      <Filter>Файлы ресурсов</Filter>
-    </None>
+    <ClCompile Include="load_gdi_bitmap.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
