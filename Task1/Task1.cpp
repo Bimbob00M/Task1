@@ -148,14 +148,12 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
             g_solidBrushBkgnd = CreateSolidBrush( RGB( rand() % 256, rand() % 256, rand() % 256 ) );
 
-            Gdiplus::Bitmap* bitmap1 = LoadGdiBitmap( hInst, MAKEINTRESOURCE( ID_BKGND_IMAGE ), _T( "JPEG" ) );
-            bitmap1->GetLastStatus();
-
-            Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromFile( L"space.jpeg" );
+            Gdiplus::Bitmap* pBbitmap = LoadGdiBitmap( hInst, MAKEINTRESOURCE( ID_BKGND_IMAGE ), _T( "JPEG" ) );
             HBITMAP hBitmap;
-            bitmap1->GetHBITMAP( {}, &hBitmap );
+            pBbitmap->GetHBITMAP( {}, &hBitmap );
             g_patternBrushBkgnd = CreatePatternBrush( hBitmap );
             DeleteObject( hBitmap );
+            DeleteObject( pBbitmap );
 
             SetClassLongPtr( hWnd, GCL_HBRBACKGROUND, reinterpret_cast<LONG>( g_solidBrushBkgnd ) );
             InvalidateRect( hWnd, nullptr, true );
