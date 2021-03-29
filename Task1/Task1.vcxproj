@@ -170,7 +170,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico" />
+    <Image Include="space.jpeg" />
     <Image Include="Task1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="jpeg2.bin" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

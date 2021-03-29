@@ -11,16 +11,15 @@
 
 #define UM_CHANGE_BKGND WM_APP + 1
 
-HINSTANCE hInst;                                
-WCHAR szTitle[MAX_LOADSTRING];                  
-WCHAR szWindowClass[MAX_LOADSTRING];           
+HINSTANCE hInst;
+WCHAR szTitle[MAX_LOADSTRING];
+WCHAR szWindowClass[MAX_LOADSTRING];
 
 WNDPROC g_oldProc;
-HWND g_btn;
+HWND g_btnSwitchProcedure;
 const int ID_CHANGE_WNDPROC_BTN = 12345;
-std::unique_ptr<HBRUSH> g_brush;
-std::unique_ptr<HBITMAP> g_bkgnd_bitmap; 
-std::unique_ptr<Gdiplus::Bitmap> g_bkgnd;
+HBRUSH g_solidBrushBkgnd;
+HBRUSH g_patternBrushBkgnd;
 ULONG_PTR g_gdiplusToken;
 
 ATOM                MyRegisterClass( HINSTANCE hInstance );
@@ -37,7 +36,7 @@ int APIENTRY wWinMain( _In_ HINSTANCE hInstance,
                        _In_ int       nCmdShow )
 {
     UNREFERENCED_PARAMETER( hPrevInstance );
-    UNREFERENCED_PARAMETER( lpCmdLine ); 
+    UNREFERENCED_PARAMETER( lpCmdLine );
 
     srand( time( 0 ) );
 
@@ -88,7 +87,7 @@ ATOM MyRegisterClass( HINSTANCE hInstance )
 
 BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 {
-    hInst = hInstance; 
+    hInst = hInstance;
 
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     Gdiplus::GdiplusStartup( &g_gdiplusToken, &gdiplusStartupInput, NULL );
@@ -134,40 +133,40 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             int xPos = ( ( rc.right - rc.left ) - width ) / 2;
             int yPos = ( ( rc.bottom - rc.top ) - height ) / 2;
 
-            g_btn = CreateWindow( L"button",
-                                  L"Double click me",
-                                  WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY,
-                                  xPos,
-                                  yPos,
-                                  width,
-                                  height,
-                                  hWnd,
-                                  reinterpret_cast<HMENU>( ID_CHANGE_WNDPROC_BTN ),
-                                  hInst,
-                                  nullptr );
+            g_btnSwitchProcedure = CreateWindow( L"button",
+                                                 L"Double click me",
+                                                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY,
+                                                 xPos,
+                                                 yPos,
+                                                 width,
+                                                 height,
+                                                 hWnd,
+                                                 reinterpret_cast<HMENU>( ID_CHANGE_WNDPROC_BTN ),
+                                                 hInst,
+                                                 nullptr );
 
-            g_brush = std::make_unique<HBRUSH>( CreateSolidBrush( RGB( rand() % 256, rand() % 256, rand() % 256 ) ) );
-            
-            Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromFile( L"space.jpeg", false );
-            HBITMAP bmp;
-            bitmap->GetHBITMAP( {}, &bmp );
-            g_bkgnd_bitmap = std::make_unique<HBITMAP>( bmp );
-            bmp = nullptr;
+            g_solidBrushBkgnd = CreateSolidBrush( RGB( rand() % 256, rand() % 256, rand() % 256 ) );
 
-            SetClassLongPtr( hWnd, GCL_HBRBACKGROUND, reinterpret_cast<LONG>( *g_brush ) );
-            InvalidateRect( hWnd, nullptr, true );            
+            Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromFile( L"space.jpeg" );
+            HBITMAP hBitmap;
+            bitmap->GetHBITMAP( {}, &hBitmap );
+            g_patternBrushBkgnd = CreatePatternBrush( hBitmap );
+            DeleteObject( hBitmap );
+
+            SetClassLongPtr( hWnd, GCL_HBRBACKGROUND, reinterpret_cast<LONG>( g_solidBrushBkgnd ) );
+            InvalidateRect( hWnd, nullptr, true );
             break;
         }
         case UM_CHANGE_BKGND:
         {
-            SetClassLongPtr( hWnd, GCL_HBRBACKGROUND, reinterpret_cast<LONG>( *g_brush ) );
+            SetClassLongPtr( hWnd, GCL_HBRBACKGROUND, reinterpret_cast<LONG>( g_solidBrushBkgnd ) );
             InvalidateRect( hWnd, nullptr, true );
             break;
         }
         case WM_COMMAND:
         {
             switch( LOWORD( wParam ) )
-            {                
+            {
                 case ID_CHANGE_WNDPROC_BTN:
                 {
                     if( HIWORD( wParam ) == BN_DBLCLK )
@@ -188,17 +187,13 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             }
             break;
         }
-        case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint( hWnd, &ps );
-
-            EndPaint( hWnd, &ps );
-            break;
-        }
         case WM_DESTROY:
         {
+            DeleteObject( g_btnSwitchProcedure );
+            DeleteObject( g_solidBrushBkgnd );
+            DeleteObject( g_patternBrushBkgnd );
             Gdiplus::GdiplusShutdown( g_gdiplusToken );
+
             PostQuitMessage( 0 );
             break;
         }
@@ -214,17 +209,15 @@ LRESULT CALLBACK BtnDblClickWndProc( HWND hWnd, UINT message, WPARAM wParam, LPA
     {
         case UM_CHANGE_BKGND:
         {
-
-            auto bkgnd = CreatePatternBrush( *g_bkgnd_bitmap );
             SetClassLongPtr( hWnd,
                              GCL_HBRBACKGROUND,
-                             reinterpret_cast<LONG>( bkgnd ) );
+                             reinterpret_cast<LONG>( g_patternBrushBkgnd ) );
             InvalidateRect( hWnd, nullptr, true );
             break;
         }
         case WM_COMMAND:
         {
-            if( LOWORD( wParam ) == ID_CHANGE_WNDPROC_BTN && 
+            if( LOWORD( wParam ) == ID_CHANGE_WNDPROC_BTN &&
                 HIWORD( wParam ) == BN_DBLCLK )
             {
                 SwitchWndProc( hWnd, MainWndProc );
@@ -261,7 +254,7 @@ INT_PTR CALLBACK About( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 
         case WM_COMMAND:
         {
-            if( LOWORD( wParam ) == IDOK || 
+            if( LOWORD( wParam ) == IDOK ||
                 LOWORD( wParam ) == IDCANCEL )
             {
                 EndDialog( hDlg, LOWORD( wParam ) );

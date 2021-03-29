@@ -40,10 +40,18 @@
     <Image Include="Task1.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="space.jpeg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="task1.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="jpeg2.bin">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
   </ItemGroup>
 </Project>
